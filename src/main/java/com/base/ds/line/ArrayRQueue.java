@@ -80,7 +80,7 @@ public class ArrayRQueue<T> {
         System.out.println(queue);
         queue.enqueue(10);
         System.out.println(queue);
-        System.out.println(queue.isEmpty());
+        System.out.println(queue.isEmpty()  );
     }
 
 }
