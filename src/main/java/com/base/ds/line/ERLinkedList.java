@@ -92,11 +92,46 @@ public class ERLinkedList<T> {
         size ++;
     }
 
-    public T remove(int idx){
+    /*public T remove(int idx){
         return null;
-    }
+    }*/
 
     public void remove(T data) {
+        //如果链表为空，直接范围
+        if (size == 0) {
+            return;
+        }
+        Node<T> head = last.next;
+        Node<T> cur = last.next;
+        Node<T> pre = last;
+
+        //如果链表只有一个节点，单独处理
+        if (data.equals(cur.data)
+                && last == head) {
+            last = null;
+            size --;
+            return;
+        }
+
+        //从头开始遍历整个节点
+        for (int i = 0;i < size;i ++ ) {
+            //如果找到了待删除的节点
+            if (cur.data.equals(data)) {
+                Node<T> delNode = cur;
+                pre.next = cur.next;
+                //无用，让理解上更连贯
+                cur = cur.next;
+                delNode.next = null;
+                size --;
+                //如果此时pre.next = 头结点，说明删除的是尾节点，需要更新last指针为pre
+                if (pre.next == head) {
+                    last = pre;
+                }
+                return;
+            }
+            pre = cur;
+            cur = cur.next;
+        }
 
     }
 
@@ -152,6 +187,10 @@ public class ERLinkedList<T> {
         list.add(4,0);
         System.out.println(list);
         list.add(5,1);
+        System.out.println(list);
+        /*list.remove(3);
+        System.out.println(list);*/
+        list.remove(2);
         System.out.println(list);
     }
 }
