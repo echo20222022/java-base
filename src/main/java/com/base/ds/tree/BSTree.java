@@ -267,7 +267,7 @@ public class BSTree<E extends Comparable<E>> {
         }
         Queue<Node<E>> queue = new LinkedList<>();
         queue.add(root);
-        while (!queue.isEmpty()) {
+        while (!queue.isEmpty() && root != null) {
             Node<E> cur = queue.remove();
             System.out.println(cur.data);
             if (cur.left != null) {
