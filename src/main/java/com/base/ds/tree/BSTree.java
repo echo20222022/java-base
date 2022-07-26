@@ -3,8 +3,7 @@ package com.base.ds.tree;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.InternalException;
 import sun.tools.jconsole.inspector.XNodeInfo;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * 二分搜索树：左节点小于根节点，右节点大于根节点
@@ -286,6 +285,91 @@ public class BSTree<E extends Comparable<E>> {
     public int size() {
         return size;
     }
+
+    //通过前序序列 + 中序序列重建一个二叉树
+    /**
+     * @param preOrder 前序序列
+     * @param inOrder 中序序列
+     * */
+    public Node<E> buildTree1(E[] preOrder, E[] inOrder) {
+        if (preOrder == null || inOrder == null
+            || preOrder.length == 0 || inOrder.length == 0) {
+            return null;
+        }
+        List<E> preList = new ArrayList<>(preOrder.length);
+        for (int i = 0;i < preOrder.length;i ++) {
+            preList.add(preOrder[i]);
+        }
+        return help1(preList, inOrder);
+    }
+
+    private Node<E> help1(List<E> preList, E[] inOrder) {
+        if (preList.size() == 0 || inOrder == null || inOrder.length == 0) {
+            return null;
+        }
+
+        E value = preList.remove(0);
+        //根节点
+        Node<E> node = new Node<>(value);
+
+        E[] leftTree = null;
+        E[] rightTree = null;
+        //遍历中序序列
+        for (int i = 0;i < inOrder.length;i ++) {
+            //找到中序序列中的根节点，进而缺点左右节点
+            if (inOrder[i].compareTo(value) == 0) {
+                //从中序序列中截出左子树的节点
+                leftTree = i == 0 ?  //判断左子树是否为null
+                        null : Arrays.copyOfRange(inOrder, 0, i);
+                rightTree = i == (inOrder.length - 1) ?  //判断有没有右子树
+                        null : Arrays.copyOfRange(inOrder, i, inOrder.length);
+            }
+        }
+
+        node.left = help1(preList, leftTree);
+        node.right = help1(preList, rightTree);
+        return node;
+    }
+
+    //通过后续序列 + 中序序列重建一个二叉树
+    public Node<E> buildTree2(E[] postOrder, E[] inOrder) {
+        if (postOrder == null || inOrder == null
+            || postOrder.length == 0 || inOrder.length == 0) {
+            return null;
+        }
+        List<E> postList = new ArrayList<>(postOrder.length);
+        for (int i = 0;i < postOrder.length;i ++) {
+            postList.add(postOrder[i]);
+        }
+        return help2(postList, inOrder);
+    }
+
+    public Node<E> help2(List<E> postList, E[] inOrder) {
+        if (postList.size() == 0 ||
+                inOrder == null || inOrder.length == 0) {
+            return null;
+        }
+        E value = postList.remove(postList.size() - 1);
+        //构造根节点
+        Node<E> node = new Node<>(value);
+        E[] leftTree = null;
+        E[] rightTree = null;
+        for (int i = 0;i < inOrder.length;i ++) {
+            //从中序遍历中找到根节点
+            if (value.compareTo(inOrder[i]) == 0) {
+                leftTree = i == 0 ? null : Arrays.copyOfRange(inOrder, 0, i);
+                rightTree = i == inOrder.length - 1 ? null : Arrays.copyOfRange(inOrder, i , inOrder.length);
+            }
+        }
+
+        node.left = help2(postList, leftTree);
+        node.right = help2(postList, rightTree);
+
+        return node;
+    }
+
+
+    //通过层序序列 + 中序序列重建一个二叉树
 
     private static class Node<E extends Comparable<E>>{
 
