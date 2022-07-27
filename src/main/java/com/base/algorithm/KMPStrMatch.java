@@ -41,10 +41,24 @@ public class KMPStrMatch {
         int[] next = new int[chars.length];
         //表示 第一个就不匹配，j = -1是，两个指针整体向前移动
         next[0] = -1;
-
+       //[-1, ]
         int j = 0;
         int k = -1;
+        // 0 ~ length -1
         while (j < chars.length - 1) {
+            //k == -1 表示遍历的是字符数组中的第一个值
+            /**
+              a b a b a a
+              0 1 2 3 4 5
+         [-1  0  ]   ++j, ++k, j = 1, k = 0
+         [-1  0  ]   k = next[k], j = 1, k = -1
+         [-1  0  0 ]  ++j, ++k j = 2, k = 0
+         [-1, 0, 0 ]  k = next[k], j = 2, k = -1
+         [-1, 0, 0 0 ]  ++j, ++k, j = 3, k = 0
+         [-1, 0, 0 0 ] k = next[k], j = 3, k = -1
+         [-1, 0, 0 0 0 ] ++j, ++k, j = 4, k = 0
+         [-1, 0, 0 0 0 1 ] ++j, ++k, j = 5, k = 1
+             * */
             if (k == -1 || chars[j] == chars[k]) {
                 next[++j]=++k;
             } else {

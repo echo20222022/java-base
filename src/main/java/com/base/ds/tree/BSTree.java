@@ -1,5 +1,6 @@
 package com.base.ds.tree;
 
+import com.sun.security.auth.UnixNumericUserPrincipal;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.InternalException;
 import sun.tools.jconsole.inspector.XNodeInfo;
 
@@ -369,13 +370,257 @@ public class BSTree<E extends Comparable<E>> {
     }
 
 
-    //通过层序序列 + 中序序列重建一个二叉树
+    /**
+     * 用土办法 找中序遍历序列中 某个节点的前驱节点
+     * */
+
+    private Node<E> pre = null;  //前驱
+    private boolean findFlag = false;    //当前节点
+    private Node<E> q = null;    //要招的节点
+
+    private Node<E> findNode(E e) {
+        return findNode(e, root);
+    }
+
+    private Node<E> findNode(E e, Node<E> node) {
+        if (node == null) {
+            return null;
+        }
+        if (e.compareTo(node.data) < 0) {
+            return findNode(e, node.left);
+        } else if (e.compareTo(node.data) > 0) {
+            return findNode(e, node.right);
+        }
+        return node;
+    }
+
+    public E findInOrderPre(E e) {
+        q = findNode(e);
+        //p = root;
+        inOrderForFindPre(root);
+        return pre.data;
+    }
+
+    private void inOrderForFindPre(Node<E> node) {
+        if (node == null) {
+            return;
+        }
+        inOrderForFindPre(node.left);
+        visit(node);
+        inOrderForFindPre(node.right);
+    }
+
+    private void visit(Node<E> node) {
+        if (!findFlag) {
+            if (node.data.compareTo(q.data) == 0) {
+                findFlag = true;
+                System.out.println("目标节点的前驱节点为：" + pre);
+            } else {
+                pre = node;
+            }
+        }
+    }
+
+    /**
+     对二叉树进行前、中、后序的线索化
+     * */
+    //线索化过程中，用到的前驱
+    Node<E> threadIn = null;
+
+    /**
+     * 前序遍历的线索化过程：
+     * ①pre 记录当前节点的前驱节点
+     * ②如果当前节点的左子节点为空，就将这个左子节点的位置指针指向pre，并且ltag = 1
+     * ④如果pre节点的右子节点为空，就将pre的右子节点指向cur，并且rtag = 1
+     * ③然后pre = cur
+     * */
+
+    public void threadInOrder() {
+        threadInOrder(root);
+        //最终，这个pre会指向二叉树的最大的一个节点上
+        if (threadIn != null) {
+            threadIn.rtag = 1;
+        }
+    }
+
+    private void threadInOrder(Node<E> node) {
+        if (node == null) {
+            return;
+        }
+        threadInOrder(node.left);
+        inOrderThread(node);
+        threadInOrder(node.right);
+    }
+
+    //这里的操作很类似于双向链表
+    private void inOrderThread(Node<E> node) {
+        //当前节点的左子节点为空，让其指向前驱节点
+        if (node.left == null) {
+            node.left = threadIn;
+            node.ltag = 1;
+        }
+
+        //前驱节点的右子树为空，让其指向后继节点
+        if (threadIn != null && threadIn.right == null) {
+            threadIn.right = node;
+            threadIn.rtag = 1;
+        }
+        threadIn = node;
+    }
+
+    /**
+     * 遍历 中序遍历线索化 的数
+     * */
+    //求中序遍线索树中，节点node的后继，就是求当前节点右子树中的最小节点
+    private Node<E> next1(Node<E> node) {
+        if (node.rtag == 0) {
+            node = firstNode11(node.right);
+            return node;
+        }
+        return node.right;
+    }
+    private Node<E> firstNode11(Node<E> node) {
+        while (node.ltag == 0) {
+            node = node.left;
+        }
+        return node;
+    }
+    private void loop11() {
+        for (Node<E> cur = firstNode11(root); cur != null; cur = next1(cur)) {
+            System.out.println(cur.data);
+        }
+    }
+    //求中序线索树中，节点node的前驱节点，就是如果当前节点的ltag=1即返回node.left，否则，返回
+    //其左子树中的最大节点
+    private Node<E> pre1(Node<E> node){
+        if (node.ltag == 0) {
+            node = firstNode12(node);
+        }
+        return node.left;
+    }
+
+    private Node<E> firstNode12(Node<E> node) {
+        while (node.rtag == 0) {
+            node = node.right;
+        }
+        return node;
+    }
+
+    //中序线索二叉树 逆向遍历
+    private void loop12() {
+        for (Node<E> cur = firstNode12(root); cur != null; cur = pre1(cur)) {
+            System.out.println(cur.data);
+        }
+    }
+
+    /**
+     * 前序线索化
+     * */
+    Node<E> preOrderThreadPre = null;
+    public void preOrderThread() {
+        preOrderThread(root);
+        //最终，这个pre会指向二叉树的最大的一个节点上
+        if (threadIn != null) {
+            threadIn.rtag = 1;
+        }
+    }
+
+    public void preOrderThread(Node<E> node) {
+        if (node == null) {
+            return;
+        }
+        preVisit(node);
+        //这里要加一个判断，否则回形成环，原因是preVisit中会操作preOrderThreadPre
+        if (node.ltag == 0) {
+            preOrderThread(node.left);
+        }
+        preOrderThread(node.right);
+    }
+
+    private void preVisit(Node<E> node) {
+        if (node.left == null) {
+            node.left = preOrderThreadPre;
+            node.ltag = 1;
+        }
+
+        if (preOrderThreadPre != null && preOrderThreadPre.right == null) {
+            preOrderThreadPre.right = node;
+            preOrderThreadPre.rtag = 1;
+        }
+        preOrderThreadPre = node;
+    }
+
+    /**
+     * 先序后继：
+     * rtag = 1, next = cur.right
+     * rtag = 0
+     *   if left != null
+     *     next = cur.left
+     *   if right != null
+     *     next = cur.right
+     *
+     * 先序前驱：
+     * ltag = 1, pre = cur.left
+     * ltag = 0
+     *   找不到
+     * */
+
+
+    /**
+     * 后续前驱：
+     * ltag = 1, pre = cur.left
+     * ltag = 0
+     *    if cur.left != null
+     *       pre = cur.left
+     *    if cur.right != null
+     *       pre = cur.right
+     *
+     * */
+
+
+
+
+    //后续遍历的线索化
+    Node<E> postOrderPre = null;
+    public void postOrderThread() {
+        postOrderThread(root);
+        //最终，这个pre会指向二叉树的最大的一个节点上
+        if (threadIn != null) {
+            threadIn.rtag = 1;
+        }
+    }
+
+    private void postOrderThread(Node<E> node) {
+        if (node == null) {
+            return;
+        }
+        postOrderThread(node.right);
+        postOrderThread(node.left);
+        postVisit(node);
+    }
+
+    private void postVisit(Node<E> node) {
+        if (node.left == null) {
+            node.left = postOrderPre;
+            node.ltag = 1;
+        }
+
+        if (postOrderPre != null && postOrderPre.right == null) {
+            postOrderPre.right = node;
+            postOrderPre.rtag = 1;
+        }
+        postOrderPre = node;
+    }
+
 
     private static class Node<E extends Comparable<E>>{
 
         private E data;
         private Node<E> left;
         private Node<E> right;
+
+        private int ltag;   //线索化 0 - 左子节点  1 - 前驱节点
+        private int rtag;   //0 - 右子接待  2 - 后继节点
 
         public Node(E elem) {
             this(elem, null, null);
@@ -385,6 +630,15 @@ public class BSTree<E extends Comparable<E>> {
             this.left = left;
             this.right = right;
             this.data = elem;
+            this.ltag = 0;
+            this.rtag = 0;
+        }
+
+        @Override
+        public String toString() {
+            return "Node{" +
+                    "data=" + data +
+                    '}';
         }
     }
 
@@ -401,7 +655,20 @@ public class BSTree<E extends Comparable<E>> {
         bsTree.add(9);
         bsTree.add(15);
 
+        /**
+
+                5
+             3      8
+          2    4  7   10
+        1            9   15
+
+        1,2,3,4,5,7.,8,9,10,15
+         * */
         //bsTree.postOrder();
-        bsTree.levelOrder();
+        //bsTree.levelOrder();
+        Node<Integer> node = bsTree.findNode(10);
+        System.out.println(node.data + ", " + node.left.data + ", " + node.right.data);
+        System.out.println(bsTree.findInOrderPre(10));
+
     }
 }
