@@ -313,8 +313,6 @@ public class ThreadTree<E extends Comparable<E>> {
         System.out.println();
     }
 
-
-
     private static class Node<E extends Comparable<E>> {
         E data;
         Node<E> left;
