@@ -474,17 +474,20 @@ public class BSTree<E extends Comparable<E>> {
     //求中序遍线索树中，节点node的后继，就是求当前节点右子树中的最小节点
     private Node<E> next1(Node<E> node) {
         if (node.rtag == 0) {
+            //如果node没有被线索化，它的下一个节点就是右子树中的最小的节点
             node = firstNode11(node.right);
             return node;
         }
         return node.right;
     }
+    //以node为根节点的子树中，第一个被中序遍历的节点，也就是最小的节点
     private Node<E> firstNode11(Node<E> node) {
         while (node.ltag == 0) {
             node = node.left;
         }
         return node;
     }
+    //遍历中序线索二叉树
     private void loop11() {
         for (Node<E> cur = firstNode11(root); cur != null; cur = next1(cur)) {
             System.out.println(cur.data);
@@ -494,12 +497,12 @@ public class BSTree<E extends Comparable<E>> {
     //其左子树中的最大节点
     private Node<E> pre1(Node<E> node){
         if (node.ltag == 0) {
-            node = firstNode12(node);
+            node = lastNode12(node);
         }
         return node.left;
     }
 
-    private Node<E> firstNode12(Node<E> node) {
+    private Node<E> lastNode12(Node<E> node) {
         while (node.rtag == 0) {
             node = node.right;
         }
@@ -508,7 +511,7 @@ public class BSTree<E extends Comparable<E>> {
 
     //中序线索二叉树 逆向遍历
     private void loop12() {
-        for (Node<E> cur = firstNode12(root); cur != null; cur = pre1(cur)) {
+        for (Node<E> cur = lastNode12(root); cur != null; cur = pre1(cur)) {
             System.out.println(cur.data);
         }
     }
@@ -562,7 +565,7 @@ public class BSTree<E extends Comparable<E>> {
      * 先序前驱：
      * ltag = 1, pre = cur.left
      * ltag = 0
-     *   找不到
+     *   找不到，用土办法
      * */
 
 
