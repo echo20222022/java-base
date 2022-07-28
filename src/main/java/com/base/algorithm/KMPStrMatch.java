@@ -64,6 +64,8 @@ public class KMPStrMatch {
             } else {
                 k = next[k];
             }
+
+
         }
         return next;
     }
